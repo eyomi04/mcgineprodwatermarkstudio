@@ -2,13 +2,13 @@
 
 Welcome, brethren! This project is proudly owned and maintained by MCGI Productions Nueva Ecija. It is a dedicated local tool designed to help us add watermarks to photos in a clean, efficient, and professional way while keeping the process simple and secure.
 
-This project is a product of the MCGI Production team in Nueva Ecija, created to support our ministry and media needs with excellence, integrity, and a spirit of service.
+This project is a product of the MCGI Production team in Nueva Ecija, created to support our church and media needs with excellence, integrity, and a spirit of service.
 
 ## Ownership Notice
 
 This software and all related materials in this project are the property of MCGI Productions Nueva Ecija.
 
-All content, design, code, and assets within this project are intended for official and authorized use within the scope of MCGI work and ministry operations.
+All content, design, code, and assets within this project are intended for official and authorized use within the scope of MCGI work and church operations.
 
 ## Project Overview
 
@@ -25,7 +25,7 @@ This is designed for quick, private, and reliable processing while keeping work 
 
 ## Why This Project Exists
 
-In every ministry effort, good presentation matters. This tool helps us prepare images with a professional and consistent look while honoring the identity and branding of MCGI Productions Nueva Ecija.
+In every church effort, good presentation matters. This tool helps us prepare images with a professional and consistent look while honoring the identity and branding of MCGI Productions Nueva Ecija.
 
 Our aim is simple: to serve with excellence, provide quality output, and support the mission of spreading the good news with dignity and care.
 
@@ -54,7 +54,7 @@ The application processes the images locally in your browser, which helps protec
 
 - Original files remain untouched.
 - New watermarked versions are generated as separate files.
-- This tool is intended for authorized and proper use aligned with MCGI ministry and production work.
+- This tool is intended for authorized and proper use aligned with MCGI church and production work.
 
 ## MCGI Brethren Reminder
 
@@ -64,6 +64,6 @@ May this tool be used with care, responsibility, and purpose for the glory of Go
 
 ## Final Statement
 
-This project is a property of MCGI Productions Nueva Ecija and is dedicated to supporting the work of the ministry with excellence, sincerity, and faithfulness.
+This project is a property of MCGI Productions Nueva Ecija and is dedicated to supporting the work of the church with excellence, sincerity, and faithfulness.
 
 Blessed and guided by the spirit of service, we move forward with purpose.
