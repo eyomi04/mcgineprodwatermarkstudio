@@ -571,9 +571,8 @@
             <div id="results" hidden>
                 <h3 style="font-size:15px">Processed photos</h3>
                 <div class="files" id="fileList"></div>
-                <p><button class="button is-primary" id="downloadAll">Download all processed photos</button></p>
-                <p class="muted">Your browser may ask permission for multiple downloads. You can also download files
-                    individually from the list.</p>
+                <p><button class="button is-primary" id="downloadAll">Download all as ZIP</button></p>
+                <p class="muted">Download all processed photos in one ZIP file, or download files individually from the list.</p>
             </div>
         </section>
         <footer class="muted studio-footer">&copy; 2026 MCGI Productions Nueva Ecija Watermark Studio · Private local processing ·
@@ -596,13 +595,68 @@
             $('prev').onclick = () => { index--; preview() }; $('next').onclick = () => { index++; preview() };
             const toBlob = (c, m, q) => new Promise((resolve, reject) => c.toBlob(b => b ? resolve(b) : reject(Error('Image export failed')), m, q));
             function outName(f, m) { const ext = m === 'image/png' ? 'png' : m === 'image/webp' ? 'webp' : 'jpg'; return f.name.replace(/\.[^.]+$/, '') + '_watermarked.' + ext }
+            const crcTable = (() => { const table = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; table[n] = c >>> 0 } return table })();
+            function crc32(bytes) { let crc = 0xffffffff; for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8); return (crc ^ 0xffffffff) >>> 0 }
+            function zipHeader(size, nameBytes, crc, offset, central, time, date) {
+                const header = new Uint8Array(central ? 46 : 30), view = new DataView(header.buffer);
+                view.setUint32(0, central ? 0x02014b50 : 0x04034b50, true);
+                if (central) { view.setUint16(4, 20, true); view.setUint16(6, 20, true) } else view.setUint16(4, 20, true);
+                view.setUint16(central ? 8 : 6, 0x0800, true);
+                view.setUint16(central ? 10 : 8, 0, true);
+                view.setUint16(central ? 12 : 10, time, true);
+                view.setUint16(central ? 14 : 12, date, true);
+                view.setUint32(central ? 16 : 14, crc, true);
+                view.setUint32(central ? 20 : 18, size, true);
+                view.setUint32(central ? 24 : 22, size, true);
+                view.setUint16(central ? 28 : 26, nameBytes.length, true);
+                if (central) { view.setUint16(30, 0, true); view.setUint16(32, 0, true); view.setUint16(34, 0, true); view.setUint16(36, 0, true); view.setUint32(38, 0, true); view.setUint32(42, offset, true) }
+                else view.setUint16(28, 0, true);
+                return header;
+            }
+            async function createZip(files) {
+                if (!files.length) throw Error('There are no successfully processed photos to download.');
+                if (files.length > 65535) throw Error('ZIP format supports up to 65,535 files per archive.');
+                const encoder = new TextEncoder(), parts = [], directory = [], usedNames = new Set();
+                let offset = 0, directorySize = 0;
+                for (const file of files) {
+                    let name = file.name, dot = name.lastIndexOf('.'), base = dot > 0 ? name.slice(0, dot) : name, ext = dot > 0 ? name.slice(dot) : '', suffix = 2;
+                    while (usedNames.has(name)) name = `${base} (${suffix++})${ext}`;
+                    usedNames.add(name);
+                    const nameBytes = encoder.encode(name), data = new Uint8Array(await file.blob.arrayBuffer()), size = data.length;
+                    if (nameBytes.length > 65535 || size > 0xffffffff || offset + 30 + nameBytes.length + size > 0xffffffff) throw Error('The ZIP archive exceeds the supported ZIP32 size limits.');
+                    const crc = crc32(data), now = new Date(), time = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2), date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+                    const localHeader = zipHeader(size, nameBytes, crc, 0, false, time, date), centralHeader = zipHeader(size, nameBytes, crc, offset, true, time, date);
+                    parts.push(localHeader, nameBytes, file.blob);
+                    directory.push(centralHeader, nameBytes);
+                    offset += localHeader.length + nameBytes.length + size;
+                    directorySize += centralHeader.length + nameBytes.length;
+                    if (offset + directorySize > 0xffffffff) throw Error('The ZIP archive exceeds the supported ZIP32 size limits.');
+                }
+                const end = new Uint8Array(22), view = new DataView(end.buffer);
+                view.setUint32(0, 0x06054b50, true); view.setUint16(8, files.length, true); view.setUint16(10, files.length, true);
+                view.setUint32(12, directorySize, true); view.setUint32(16, offset, true); view.setUint16(20, 0, true);
+                return new Blob([...parts, ...directory, end], { type: 'application/zip' });
+            }
             async function processPhotos() {
                 if (busy || !logo || !photos.length) return; busy = true; $('process').disabled = true; $('process').textContent = 'Processing...'; $('results').hidden = true; $('progressWrap').hidden = false; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = []; const s = settings(), choice = $('format').value, q = +$('quality').value / 100, tmp = document.createElement('canvas');
                 for (let i = 0; i < photos.length; i++) { const f = photos[i]; try { const { img, url } = await readImage(f); draw(tmp, img, logo, s); URL.revokeObjectURL(url); let mime = choice === 'original' ? (f.type === 'image/png' ? 'image/png' : f.type === 'image/webp' ? 'image/webp' : 'image/jpeg') : choice; const blob = await toBlob(tmp, mime, mime === 'image/png' ? undefined : q); mime = blob.type || mime; results.push({ blob, url: URL.createObjectURL(blob), name: outName(f, mime) }) } catch (err) { results.push({ error: true, name: f.name }) } const pct = Math.round((i + 1) / photos.length * 100); $('bar').style.width = pct + '%'; $('progressPct').textContent = pct + '%'; $('progressText').textContent = `Processed ${i + 1} of ${photos.length}` }
                 $('fileList').replaceChildren(); results.forEach(r => { const row = document.createElement('div'); row.className = 'file'; const name = document.createElement('span'); name.textContent = r.name + (r.error ? ' — Failed' : ''); row.append(name); if (!r.error) { const a = document.createElement('a'); a.className = 'download'; a.textContent = 'Download'; a.href = r.url; a.download = r.name; row.append(a) } $('fileList').append(row) }); const good = results.filter(r => !r.error).length; $('status').textContent = `Completed: ${good} successful, ${results.length - good} failed.`; $('results').hidden = false; $('process').disabled = false; $('process').textContent = 'Process again'; busy = false
             }
             $('process').onclick = processPhotos;
-            $('downloadAll').onclick = async () => { for (const r of results.filter(x => !x.error)) { const a = document.createElement('a'); a.href = r.url; a.download = r.name; document.body.append(a); a.click(); a.remove(); await new Promise(resolve => setTimeout(resolve, 350)) } };
+            $('downloadAll').onclick = async () => {
+                const button = $('downloadAll'), successful = results.filter(r => !r.error);
+                button.disabled = true; button.textContent = 'Preparing ZIP...';
+                try {
+                    const zip = await createZip(successful), url = URL.createObjectURL(zip), link = document.createElement('a');
+                    link.href = url; link.download = 'mcgi-watermarked-photos.zip'; document.body.append(link); link.click(); link.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    $('status').textContent = `ZIP download started: ${successful.length} photo(s).`;
+                } catch (error) {
+                    $('status').textContent = `Could not create ZIP: ${error.message}`;
+                } finally {
+                    button.disabled = false; button.textContent = 'Download all as ZIP';
+                }
+            };
             update();
         })();
     </script>
