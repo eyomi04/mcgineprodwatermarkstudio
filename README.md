@@ -17,7 +17,7 @@ MCGI NE WaterMark Studio is a browser-based application for adding a logo waterm
 
 ## Use
 
-1. Open `photo-watermark-studio.html` in a supported browser.
+1. Open `mcgiproductionsnewatermarkstudio.html` in a supported browser.
 2. Select a watermark logo and the photos to process.
 3. Configure the watermark and output settings.
 4. Preview the result and select **Apply watermark to all photos**.
@@ -27,7 +27,7 @@ Output files are named with the `_watermarked` suffix. The original image files 
 
 ## Project Files
 
-- `photo-watermark-studio.html` — application interface and image-processing code.
+- `mcgiproductionsnewatermarkstudio.html` — application interface and image-processing code.
 - `assets/` — stylesheets and fonts used by the interface.
 - `.gitignore` — excludes image files from Git tracking.
 
