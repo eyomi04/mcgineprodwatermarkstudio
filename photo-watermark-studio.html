@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>MCGI Productions Nueva Ecija Watermark Studio</title>
+    <link rel="stylesheet" href="assets/bulma.min.css">
+    <style>
+        @font-face {
+            font-family: Poppins;
+            src: url("assets/Poppins-Regular.ttf") format("truetype");
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap
+        }
+
+        @font-face {
+            font-family: Poppins;
+            src: url("assets/Poppins-Medium.ttf") format("truetype");
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap
+        }
+
+        @font-face {
+            font-family: Poppins;
+            src: url("assets/Poppins-SemiBold.ttf") format("truetype");
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap
+        }
+
+        @font-face {
+            font-family: Poppins;
+            src: url("assets/Poppins-Bold.ttf") format("truetype");
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap
+        }
+
+        :root {
+            color-scheme: dark;
+            --page: #090b12;
+            --surface: #111520;
+            --surface-raised: #171d2a;
+            --line: #272e3d;
+            --text: #edf0f7;
+            --muted: #9aa4b6;
+            --accent: #c7a86c;
+            --accent-bright: #e4c88d;
+            --accent-ink: #17130b;
+            font-family: Poppins, sans-serif;
+            background: var(--page)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            min-width: 320px;
+            background: var(--page)
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            font-family: Poppins, sans-serif;
+            font-size: 14px;
+            background:
+                radial-gradient(ellipse at 50% -18%, #5b4b2c33, transparent 46%),
+                radial-gradient(ellipse at 100% 45%, #222b401c, transparent 40%),
+                var(--page)
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif {
+            color: var(--text);
+            font-family: "Times New Roman", Times, serif
+        }
+
+        .app.container {
+            width: min(100% - 48px, 1040px);
+            max-width: 1040px;
+            padding: 56px 0 30px
+        }
+
+        .head {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 29px;
+            padding: 0 2px 25px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .brand-kicker {
+            margin-bottom: 10px;
+            color: var(--accent-bright);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .2em;
+            text-transform: uppercase
+        }
+
+        .head h1.title {
+            max-width: 720px;
+            margin: 0 0 9px;
+            color: var(--text);
+            font-size: clamp(2.1rem, 5vw, 3.35rem);
+            font-weight: 400;
+            line-height: 1.05;
+            letter-spacing: -.025em
+        }
+
+        .head .muted {
+            margin: 0
+        }
+
+        .local-badge {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 4px;
+            padding: 9px 12px;
+            border: 1px solid #343b48;
+            border-radius: 999px;
+            background: #11151e;
+            color: #cbd2de;
+            font-size: 11px;
+            white-space: nowrap
+        }
+
+        .local-badge::before {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #6ed6a3;
+            box-shadow: 0 0 12px #6ed6a388;
+            content: ""
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7
+        }
+
+        .studio-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px
+        }
+
+        .box.studio-card {
+            margin: 0 0 16px;
+            padding: 23px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: linear-gradient(145deg, #151a25, #10141d 72%);
+            box-shadow: 0 16px 38px #0000001f
+        }
+
+        .studio-grid .studio-card {
+            min-width: 0
+        }
+
+        .studio-card h2.title {
+            display: flex;
+            align-items: baseline;
+            gap: 11px;
+            margin: 0 0 17px;
+            color: var(--text);
+            font-size: 1.32rem;
+            font-weight: 400
+        }
+
+        .step-index {
+            color: var(--accent);
+            font-family: Poppins, sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .1em
+        }
+
+        .studio-card p {
+            margin-top: 10px
+        }
+
+        .drop {
+            min-height: 138px;
+            padding: 17px;
+            border: 1px dashed #424b5b;
+            border-radius: 9px;
+            background: #0c1018
+        }
+
+        .drop input[type=file] {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            color: #c9d0dc;
+            font-family: Poppins, sans-serif;
+            font-size: 12px
+        }
+
+        .drop input[type=file]::file-selector-button {
+            margin-right: 12px;
+            padding: 8px 11px;
+            border: 1px solid #454d5b;
+            border-radius: 6px;
+            background: #1b2230;
+            color: var(--text);
+            font: 500 11px Poppins, sans-serif;
+            cursor: pointer
+        }
+
+        .drop input[type=file]::file-selector-button:hover {
+            border-color: var(--accent);
+            background: #252b37
+        }
+
+        #logoInfo,
+        #photoInfo {
+            margin-top: 11px
+        }
+
+        .studio-card .field {
+            margin: 19px 0
+        }
+
+        .studio-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px
+        }
+
+        .studio-card label,
+        .studio-card label.label {
+            display: block;
+            margin-bottom: 7px;
+            color: #dce1ea;
+            font-size: 12px;
+            font-weight: 500
+        }
+
+        .studio-row label {
+            margin-bottom: 0 !important
+        }
+
+        .studio-row b {
+            color: var(--accent-bright);
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .studio-card input[type=range] {
+            width: 100%;
+            height: 18px;
+            margin-top: 8px;
+            accent-color: var(--accent)
+        }
+
+        .studio-card select {
+            width: 100%;
+            max-width: 100%;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #343c4b;
+            border-radius: 7px;
+            background: #0c1018;
+            color: var(--text);
+            font: 12px Poppins, sans-serif
+        }
+
+        .studio-card select:focus,
+        .drop input[type=file]:focus-visible,
+        .studio-card button:focus-visible,
+        .download:focus-visible {
+            outline: 2px solid var(--accent-bright);
+            outline-offset: 3px
+        }
+
+        .posgrid {
+            display: grid;
+            grid-template-columns: repeat(3, 45px);
+            justify-content: start;
+            gap: 7px;
+            margin-top: 10px
+        }
+
+        .studio-card .button,
+        .download {
+            min-height: 40px;
+            padding: 9px 15px;
+            border: 1px solid transparent;
+            border-radius: 7px;
+            background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+            color: var(--accent-ink);
+            font: 600 11px Poppins, sans-serif;
+            text-decoration: none;
+            transition: transform .18s ease, filter .18s ease, border-color .18s ease
+        }
+
+        .studio-card .button:hover:not(:disabled),
+        .download:hover {
+            border-color: var(--accent-bright);
+            color: var(--accent-ink);
+            filter: brightness(1.08);
+            transform: translateY(-1px)
+        }
+
+        .studio-card .button:disabled {
+            opacity: .4;
+            cursor: not-allowed
+        }
+
+        .studio-card .button.secondary {
+            border-color: #3a4352;
+            background: #1a202b;
+            color: #dce1ea
+        }
+
+        .studio-card .button.secondary:hover:not(:disabled) {
+            border-color: #768195;
+            background: #222a37;
+            color: #fff
+        }
+
+        .posgrid .pos.button {
+            width: 45px;
+            min-height: 42px;
+            height: 42px;
+            padding: 0;
+            border-color: #303848;
+            background: #171d28;
+            color: #aeb8c9;
+            font-size: 16px
+        }
+
+        .posgrid .pos.button.active {
+            border-color: var(--accent);
+            background: #3a3223;
+            color: var(--accent-bright);
+            box-shadow: 0 0 0 1px #c7a86c25
+        }
+
+        .preview {
+            display: flex;
+            min-height: 265px;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow: hidden;
+            border: 1px solid #2c3442;
+            border-radius: 9px;
+            background-color: #0a0d14;
+            background-image: linear-gradient(45deg, #ffffff08 25%, transparent 25%), linear-gradient(-45deg, #ffffff08 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ffffff08 75%), linear-gradient(-45deg, transparent 75%, #ffffff08 75%);
+            background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+            background-size: 14px 14px
+        }
+
+        .preview canvas {
+            max-width: 100%;
+            max-height: 440px;
+            object-fit: contain
+        }
+
+        .preview + .studio-row {
+            margin-top: 14px
+        }
+
+        .preview + .studio-row #counter {
+            font-variant-numeric: tabular-nums
+        }
+
+        .studio-progress {
+            height: 7px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #282f3d
+        }
+
+        .bar {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #a7894e, var(--accent-bright));
+            transition: width .15s
+        }
+
+        .files {
+            max-height: 250px;
+            overflow: auto
+        }
+
+        .file {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+            color: #dce1ea;
+            font-size: 12px
+        }
+
+        .download {
+            display: inline-block;
+            flex: 0 0 auto;
+            min-height: 0;
+            padding: 6px 10px
+        }
+
+        #process {
+            min-height: 44px;
+            padding-right: 20px;
+            padding-left: 20px
+        }
+
+        #status {
+            margin-top: 10px
+        }
+
+        .studio-footer {
+            margin-top: 8px;
+            padding: 18px 10px;
+            border-top: 1px solid var(--line);
+            text-align: center
+        }
+
+        @media(max-width:700px) {
+            .app.container {
+                width: min(100% - 32px, 540px);
+                padding-top: 35px
+            }
+
+            .head {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 17px;
+                margin-bottom: 20px
+            }
+
+            .local-badge {
+                margin: 0
+            }
+
+            .studio-grid {
+                grid-template-columns: 1fr;
+                gap: 0
+            }
+
+            .box.studio-card {
+                padding: 19px;
+                margin-bottom: 13px
+            }
+
+            .preview {
+                min-height: 220px
+            }
+        }
+
+        @media(max-width:420px) {
+            .app.container {
+                width: min(100% - 24px, 380px)
+            }
+
+            .head h1.title {
+                font-size: 2.15rem
+            }
+
+            .studio-card .studio-row {
+                gap: 8px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="app container">
+        <header class="head">
+            <div>
+                <div class="brand-kicker">MCGI Productions · Nueva Ecija</div>
+                <h1 class="title">Watermark Studio</h1>
+                <div class="muted">A refined, private workspace for branding your photo collection.</div>
+            </div>
+            <div class="local-badge">Private local processing</div>
+        </header>
+        <div class="studio-grid">
+        <section class="box studio-card">
+            <h2 class="title"><span class="step-index">01</span>Upload watermark logo</h2>
+            <div class="drop"><input id="logoFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                <p class="muted">Transparent PNG recommended. SVG and WebP are also supported.</p>
+                <div id="logoInfo" class="muted">No logo selected</div><img id="logoThumb" hidden
+                    style="max-width:130px;max-height:85px;margin-top:10px;object-fit:contain">
+            </div>
+        </section>
+        <section class="box studio-card">
+            <h2 class="title"><span class="step-index">02</span>Select photos</h2>
+            <div class="drop"><input id="photoFiles" type="file" accept="image/*" multiple webkitdirectory directory>
+                <p class="muted">Choose a folder. You can also select multiple image files.</p>
+                <div id="photoInfo" class="muted">No photos selected</div>
+            </div>
+        </section>
+        </div>
+        <section class="box studio-card">
+            <h2 class="title"><span class="step-index">03</span>Watermark settings</h2>
+            <div class="field">
+                <div class="studio-row"><label for="size">Logo width relative to photo</label><b id="sizeVal">15%</b></div>
+                <input id="size" type="range" min="2" max="50" value="15">
+            </div>
+            <div class="field">
+                <div class="studio-row"><label for="opacity">Opacity</label><b id="opacityVal">85%</b></div><input id="opacity"
+                    type="range" min="10" max="100" value="85">
+            </div>
+            <div class="field">
+                <div class="studio-row"><label for="margin">Distance from edge</label><b id="marginVal">3%</b></div><input
+                    id="margin" type="range" min="0" max="15" value="3">
+            </div>
+            <div class="field"><label>Position</label>
+                <div class="posgrid" id="positions">
+                    <button class="button pos" data-pos="tl">↖</button><button class="button pos" data-pos="tc">↑</button><button
+                        class="button pos" data-pos="tr">↗</button>
+                    <button class="button pos" data-pos="ml">←</button><button class="button pos" data-pos="mc">●</button><button
+                        class="button pos" data-pos="mr">→</button>
+                    <button class="button pos" data-pos="bl">↙</button><button class="button pos" data-pos="bc">↓</button><button
+                        class="button pos active" data-pos="br">↘</button>
+                </div>
+            </div>
+            <div class="field"><label for="format">Output format</label><select id="format">
+                    <option value="original">Keep original format</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/png">PNG</option>
+                    <option value="image/webp">WebP</option>
+                </select></div>
+            <div class="field" id="qualityWrap">
+                    <div class="studio-row"><label for="quality">JPEG / WebP quality</label><b id="qualityVal">92%</b></div><input
+                    id="quality" type="range" min="50" max="100" value="92">
+            </div>
+        </section>
+        <section class="box studio-card">
+                <div class="studio-row">
+                    <h2 class="title"><span class="step-index">04</span>Preview</h2><span class="muted" id="orientation">No image</span>
+            </div>
+            <div class="preview"><canvas id="canvas" hidden></canvas><span id="empty" class="muted">Select a logo and
+                    photos to see a preview.</span></div>
+                <div class="studio-row" style="margin-top:12px"><button class="button secondary" id="prev" disabled>←
+                        Previous</button><span id="counter" class="muted">0 / 0</span><button class="button secondary" id="next"
+                    disabled>Next →</button></div>
+        </section>
+        <section class="box studio-card">
+                <h2 class="title"><span class="step-index">05</span>Process and download</h2>
+            <p class="muted">Your originals are never changed. New watermarked copies are created in your browser.</p>
+                <button class="button is-primary" id="process" disabled>Apply watermark to all photos</button>
+            <div id="progressWrap" hidden style="margin-top:15px">
+                    <div class="studio-row muted"><span id="progressText">Processing...</span><span id="progressPct">0%</span>
+                </div>
+                    <div class="studio-progress">
+                    <div class="bar" id="bar"></div>
+                </div>
+            </div>
+            <p id="status" class="muted" aria-live="polite"></p>
+            <div id="results" hidden>
+                <h3 style="font-size:15px">Processed photos</h3>
+                <div class="files" id="fileList"></div>
+                <p><button class="button is-primary" id="downloadAll">Download all processed photos</button></p>
+                <p class="muted">Your browser may ask permission for multiple downloads. You can also download files
+                    individually from the list.</p>
+            </div>
+        </section>
+        <footer class="muted studio-footer">&copy; 2026 MCGI Productions Nueva Ecija Watermark Studio · Private local processing ·
+            No account or internet connection required after download</footer>
+    </main>
+    <script>
+        (() => {
+            const $ = id => document.getElementById(id);
+            let logo = null, logoURL = null, photos = [], index = 0, position = 'br', results = [], busy = false;
+            const canvas = $('canvas'), ctx = canvas.getContext('2d');
+            const readImage = file => new Promise((resolve, reject) => { const url = URL.createObjectURL(file), img = new Image(); img.onload = () => resolve({ img, url }); img.onerror = () => { URL.revokeObjectURL(url); reject(Error('Could not read image')) }; img.src = url });
+            const settings = () => ({ size: +$('size').value / 100, opacity: +$('opacity').value / 100, margin: +$('margin').value / 100, pos: position });
+            function draw(target, img, mark, s) { const w = img.naturalWidth, h = img.naturalHeight; target.width = w; target.height = h; const c = target.getContext('2d'); c.clearRect(0, 0, w, h); c.drawImage(img, 0, 0, w, h); if (!mark) return; const lw = w * s.size, lh = lw * mark.naturalHeight / mark.naturalWidth, m = Math.min(w, h) * s.margin; let x = m, y = m; if (s.pos.endsWith('r')) x = w - m - lw; if (s.pos.endsWith('c')) x = (w - lw) / 2; if (s.pos.startsWith('b')) y = h - m - lh; if (s.pos.startsWith('m')) y = (h - lh) / 2; c.save(); c.globalAlpha = s.opacity; c.drawImage(mark, x, y, lw, lh); c.restore() }
+            function preview() { const f = photos[index]; $('counter').textContent = photos.length ? `${index + 1} / ${photos.length}` : '0 / 0'; $('prev').disabled = !f || index === 0; $('next').disabled = !f || index === photos.length - 1; $('empty').hidden = !!f; canvas.hidden = !f; if (!f) { $('orientation').textContent = 'No image'; return } $('orientation').textContent = f.width >= f.height ? 'Landscape' : 'Portrait'; readImage(f).then(({ img, url }) => { if (photos[index] === f) draw(canvas, img, logo, settings()); URL.revokeObjectURL(url) }).catch(() => { $('empty').hidden = false; $('empty').textContent = 'Unable to preview this image'; canvas.hidden = true }) }
+            function update() { [['size', 'sizeVal'], ['opacity', 'opacityVal'], ['margin', 'marginVal'], ['quality', 'qualityVal']].forEach(([a, b]) => $(b).textContent = $(a).value + '%'); $('qualityWrap').hidden = $('format').value === 'image/png'; preview() }
+            $('logoFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const o = await readImage(f); if (logoURL) URL.revokeObjectURL(logoURL); logo = o.img; logoURL = o.url; $('logoThumb').src = logoURL; $('logoThumb').hidden = false; $('logoInfo').textContent = `${f.name} · ${logo.naturalWidth} × ${logo.naturalHeight}`; $('process').disabled = !photos.length; update() } catch { $('logoInfo').textContent = 'Could not load logo' } };
+            $('photoFiles').onchange = e => { photos = Array.from(e.target.files).filter(f => f.type.startsWith('image/')); photos.sort((a, b) => (a.webkitRelativePath || a.name).localeCompare(b.webkitRelativePath || b.name, undefined, { numeric: true })); index = 0; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = []; $('results').hidden = true; $('photoInfo').textContent = `${photos.length} supported image(s) selected`; $('process').disabled = !photos.length || !logo; update() };
+            ['size', 'opacity', 'margin', 'quality', 'format'].forEach(id => $(id).addEventListener('input', update));
+            document.querySelectorAll('.pos').forEach(b => b.onclick = () => { position = b.dataset.pos; document.querySelectorAll('.pos').forEach(x => x.classList.toggle('active', x === b)); update() });
+            $('prev').onclick = () => { index--; preview() }; $('next').onclick = () => { index++; preview() };
+            const toBlob = (c, m, q) => new Promise((resolve, reject) => c.toBlob(b => b ? resolve(b) : reject(Error('Image export failed')), m, q));
+            function outName(f, m) { const ext = m === 'image/png' ? 'png' : m === 'image/webp' ? 'webp' : 'jpg'; return f.name.replace(/\.[^.]+$/, '') + '_watermarked.' + ext }
+            async function processPhotos() {
+                if (busy || !logo || !photos.length) return; busy = true; $('process').disabled = true; $('process').textContent = 'Processing...'; $('results').hidden = true; $('progressWrap').hidden = false; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = []; const s = settings(), choice = $('format').value, q = +$('quality').value / 100, tmp = document.createElement('canvas');
+                for (let i = 0; i < photos.length; i++) { const f = photos[i]; try { const { img, url } = await readImage(f); draw(tmp, img, logo, s); URL.revokeObjectURL(url); let mime = choice === 'original' ? (f.type === 'image/png' ? 'image/png' : f.type === 'image/webp' ? 'image/webp' : 'image/jpeg') : choice; const blob = await toBlob(tmp, mime, mime === 'image/png' ? undefined : q); mime = blob.type || mime; results.push({ blob, url: URL.createObjectURL(blob), name: outName(f, mime) }) } catch (err) { results.push({ error: true, name: f.name }) } const pct = Math.round((i + 1) / photos.length * 100); $('bar').style.width = pct + '%'; $('progressPct').textContent = pct + '%'; $('progressText').textContent = `Processed ${i + 1} of ${photos.length}` }
+                $('fileList').replaceChildren(); results.forEach(r => { const row = document.createElement('div'); row.className = 'file'; const name = document.createElement('span'); name.textContent = r.name + (r.error ? ' — Failed' : ''); row.append(name); if (!r.error) { const a = document.createElement('a'); a.className = 'download'; a.textContent = 'Download'; a.href = r.url; a.download = r.name; row.append(a) } $('fileList').append(row) }); const good = results.filter(r => !r.error).length; $('status').textContent = `Completed: ${good} successful, ${results.length - good} failed.`; $('results').hidden = false; $('process').disabled = false; $('process').textContent = 'Process again'; busy = false
+            }
+            $('process').onclick = processPhotos;
+            $('downloadAll').onclick = async () => { for (const r of results.filter(x => !x.error)) { const a = document.createElement('a'); a.href = r.url; a.download = r.name; document.body.append(a); a.click(); a.remove(); await new Promise(resolve => setTimeout(resolve, 350)) } };
+            update();
+        })();
+    </script>
+</body>
+
+</html>
