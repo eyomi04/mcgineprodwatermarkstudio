@@ -4,27 +4,32 @@ This project is the property of MCGI Productions Nueva Ecija.
 
 ## Overview
 
-MCGI NE WaterMark Studio is a browser-based application for adding a logo watermark to one or more images. Image processing runs in the browser. The application does not modify the original files or require an account or internet connection after the project files have been downloaded.
+MCGI NE WaterMark Studio is a browser-based application for adding a logo watermark to photos and videos. Processing runs in the browser. The application does not modify the original files or require an account or internet connection after the project files have been downloaded.
 
 ## Features
 
-- Select multiple images or an image directory.
+- Select multiple photos and videos or an image directory.
 - Upload a watermark logo in PNG, JPEG, WebP, or SVG format.
 - Adjust watermark size, opacity, and distance from the image edge.
 - Preview watermark placement before processing.
-- Automatically slide through photos in the preview panel while batch processing.
+- Automatically slide through photos and video thumbnails in the preview panel while batch processing.
+- Apply the same watermark settings to photos and videos in one batch.
+- Preview a still video thumbnail while each video is processed.
+- Choose a global video output format: prefer MP4 with WebM fallback, MP4 only, or WebM only.
+- Preserve video audio when supported by the browser.
 - Export as JPEG, PNG, or WebP, or retain the source image format where supported.
 - Download processed images individually or as a single ZIP archive.
 
 ## Use
 
 1. Open `mcgiproductionsnewatermarkstudio.html` in a supported browser.
-2. Select a watermark logo and the photos to process.
+2. Select a watermark logo and the photos and videos to process.
 3. Configure the watermark and output settings.
-4. Preview the result and select **Apply watermark to all photos**.
-5. Download the processed images.
+4. Choose the video output format if processing videos.
+5. Preview the result and select **Apply watermark to all photos and videos**.
+6. Download the processed files.
 
-Output files are named with the `_watermarked` suffix. The original image files are not changed.
+Output files are named with the `_watermarked` suffix. Photos use the selected photo output format; videos use the selected global video format. Video output is re-encoded in real time. Available video formats, video decoding, and audio preservation depend on browser support. The original files are not changed.
 
 ## Project Files
 

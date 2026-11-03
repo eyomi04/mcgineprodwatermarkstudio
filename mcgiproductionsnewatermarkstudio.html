@@ -526,9 +526,9 @@
             </div>
         </section>
         <section class="box studio-card">
-            <h2 class="title"><span class="step-index">02</span>Select photos</h2>
-            <div class="drop"><input id="photoFiles" type="file" accept="image/*" multiple webkitdirectory directory>
-                <p class="muted">Choose a folder. You can also select multiple image files.</p>
+            <h2 class="title"><span class="step-index">02</span>Select photos and videos folder</h2>
+            <div class="drop"><input id="photoFiles" type="file" accept="image/*,video/*" multiple webkitdirectory directory>
+                <p class="muted">Choose a folder or select multiple photo and video files.</p>
                 <div id="photoInfo" class="muted">No photos selected</div>
             </div>
         </section>
@@ -567,6 +567,15 @@
                     <div class="studio-row"><label for="quality">JPEG / WebP quality</label><b id="qualityVal">92%</b></div><input
                     id="quality" type="range" min="50" max="100" value="92">
             </div>
+            <div class="field">
+                <label for="videoFormat">Video output format (all videos)</label>
+                <select id="videoFormat">
+                    <option value="mp4-fallback" selected>Prefer MP4, fall back to WebM</option>
+                    <option value="mp4">MP4 only</option>
+                    <option value="webm">WebM only</option>
+                </select>
+                <p class="muted">Videos are re-encoded in real time. Original audio is included where supported by your browser.</p>
+            </div>
         </section>
         <section class="box studio-card">
                 <div class="studio-row">
@@ -581,7 +590,7 @@
         <section class="box studio-card">
                 <h2 class="title"><span class="step-index">05</span>Process and download</h2>
             <p class="muted">Your originals are never changed. New watermarked copies are created in your browser.</p>
-                <button class="button is-primary" id="process" disabled>Apply watermark to all photos</button>
+                <button class="button is-primary" id="process" disabled>Apply watermark to all photos and videos</button>
             <div id="progressWrap" hidden style="margin-top:15px">
                     <div class="studio-row muted"><span id="progressText">Processing...</span><span id="progressPct">0%</span>
                 </div>
@@ -591,10 +600,10 @@
             </div>
             <p id="status" class="muted" aria-live="polite"></p>
             <div id="results" hidden>
-                <h3 style="font-size:15px">Processed photos</h3>
+                <h3 style="font-size:15px">Processed files</h3>
                 <div class="files" id="fileList"></div>
                 <p><button class="button is-primary" id="downloadAll">Download all as ZIP</button></p>
-                <p class="muted">Download all processed photos in one ZIP file, or download files individually from the list.</p>
+                <p class="muted">Download all processed photos and videos in one ZIP file, or download files individually from the list.</p>
             </div>
         </section>
         <footer class="muted studio-footer">&copy; 2026 MCGI Productions Nueva Ecija Watermark Studio · Private local processing ·
@@ -606,15 +615,38 @@
             let logo = null, logoURL = null, photos = [], index = 0, position = 'br', results = [], busy = false;
             const canvas = $('canvas'), ctx = canvas.getContext('2d');
             const readImage = file => new Promise((resolve, reject) => { const url = URL.createObjectURL(file), img = new Image(); img.onload = () => resolve({ img, url }); img.onerror = () => { URL.revokeObjectURL(url); reject(Error('Could not read image')) }; img.src = url });
+            const openVideo = file => new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file), video = document.createElement('video');
+                video.preload = 'auto'; video.playsInline = true;
+                video.onloadeddata = () => resolve({ img: video, video, url });
+                video.onerror = () => { URL.revokeObjectURL(url); reject(Error('Could not read video')) };
+                video.src = url; video.load();
+            });
             const settings = () => ({ size: +$('size').value / 100, opacity: +$('opacity').value / 100, margin: +$('margin').value / 100, pos: position });
-            function draw(target, img, mark, s) { const w = img.naturalWidth, h = img.naturalHeight; target.width = w; target.height = h; const c = target.getContext('2d'); c.clearRect(0, 0, w, h); c.drawImage(img, 0, 0, w, h); if (!mark) return; const lw = w * s.size, lh = lw * mark.naturalHeight / mark.naturalWidth, m = Math.min(w, h) * s.margin; let x = m, y = m; if (s.pos.endsWith('r')) x = w - m - lw; if (s.pos.endsWith('c')) x = (w - lw) / 2; if (s.pos.startsWith('b')) y = h - m - lh; if (s.pos.startsWith('m')) y = (h - lh) / 2; c.save(); c.globalAlpha = s.opacity; c.drawImage(mark, x, y, lw, lh); c.restore() }
-            function preview() { const f = photos[index]; $('counter').textContent = photos.length ? `${index + 1} / ${photos.length}` : '0 / 0'; $('prev').disabled = !f || index === 0; $('next').disabled = !f || index === photos.length - 1; $('empty').hidden = !!f; canvas.hidden = !f; if (!f) { $('orientation').textContent = 'No image'; return } $('orientation').textContent = f.width >= f.height ? 'Landscape' : 'Portrait'; readImage(f).then(({ img, url }) => { if (photos[index] === f) draw(canvas, img, logo, settings()); URL.revokeObjectURL(url) }).catch(() => { $('empty').hidden = false; $('empty').textContent = 'Unable to preview this image'; canvas.hidden = true }) }
+            function dimensions(img) { return { width: img.naturalWidth || img.videoWidth, height: img.naturalHeight || img.videoHeight } }
+            function draw(target, img, mark, s) { const { width: w, height: h } = dimensions(img); if (target.width !== w) target.width = w; if (target.height !== h) target.height = h; const c = target.getContext('2d'); c.clearRect(0, 0, w, h); c.drawImage(img, 0, 0, w, h); if (!mark) return; const lw = w * s.size, lh = lw * mark.naturalHeight / mark.naturalWidth, m = Math.min(w, h) * s.margin; let x = m, y = m; if (s.pos.endsWith('r')) x = w - m - lw; if (s.pos.endsWith('c')) x = (w - lw) / 2; if (s.pos.startsWith('b')) y = h - m - lh; if (s.pos.startsWith('m')) y = (h - lh) / 2; c.save(); c.globalAlpha = s.opacity; c.drawImage(mark, x, y, lw, lh); c.restore() }
+            function preview() {
+                const f = photos[index];
+                $('counter').textContent = photos.length ? `${index + 1} / ${photos.length}` : '0 / 0';
+                $('prev').disabled = !f || index === 0; $('next').disabled = !f || index === photos.length - 1;
+                $('empty').hidden = !!f; canvas.hidden = !f;
+                if (!f) { $('orientation').textContent = 'No image'; return }
+                const videoFile = f.type.startsWith('video/');
+                $('orientation').textContent = videoFile ? 'Video thumbnail' : f.width >= f.height ? 'Landscape' : 'Portrait';
+                const loadPreview = videoFile ? openVideo(f) : readImage(f);
+                loadPreview.then(({ img, video, url }) => {
+                    if (photos[index] === f) draw(canvas, img, logo, settings());
+                    if (video) video.removeAttribute('src');
+                    URL.revokeObjectURL(url);
+                }).catch(() => { $('empty').hidden = false; $('empty').textContent = 'Unable to preview this file'; canvas.hidden = true });
+            }
             function showProcessingPreview(img, photoIndex, s) {
                 index = photoIndex;
                 $('counter').textContent = `${index + 1} / ${photos.length}`;
                 $('prev').disabled = index === 0;
                 $('next').disabled = index === photos.length - 1;
-                $('orientation').textContent = img.naturalWidth >= img.naturalHeight ? 'Landscape' : 'Portrait';
+                const { width, height } = dimensions(img);
+                $('orientation').textContent = img.videoWidth ? 'Video thumbnail' : width >= height ? 'Landscape' : 'Portrait';
                 $('empty').hidden = true;
                 canvas.hidden = false;
                 canvas.classList.remove('is-sliding');
@@ -624,12 +656,83 @@
             }
             function update() { [['size', 'sizeVal'], ['opacity', 'opacityVal'], ['margin', 'marginVal'], ['quality', 'qualityVal']].forEach(([a, b]) => $(b).textContent = $(a).value + '%'); $('qualityWrap').hidden = $('format').value === 'image/png'; preview() }
             $('logoFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const o = await readImage(f); if (logoURL) URL.revokeObjectURL(logoURL); logo = o.img; logoURL = o.url; $('logoThumb').src = logoURL; $('logoThumb').hidden = false; $('logoInfo').textContent = `${f.name} · ${logo.naturalWidth} × ${logo.naturalHeight}`; $('process').disabled = !photos.length; update() } catch { $('logoInfo').textContent = 'Could not load logo' } };
-            $('photoFiles').onchange = e => { photos = Array.from(e.target.files).filter(f => f.type.startsWith('image/')); photos.sort((a, b) => (a.webkitRelativePath || a.name).localeCompare(b.webkitRelativePath || b.name, undefined, { numeric: true })); index = 0; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = []; $('results').hidden = true; $('photoInfo').textContent = `${photos.length} supported image(s) selected`; $('process').disabled = !photos.length || !logo; update() };
-            ['size', 'opacity', 'margin', 'quality', 'format'].forEach(id => $(id).addEventListener('input', update));
+            $('photoFiles').onchange = e => {
+                photos = Array.from(e.target.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+                photos.sort((a, b) => (a.webkitRelativePath || a.name).localeCompare(b.webkitRelativePath || b.name, undefined, { numeric: true }));
+                index = 0; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = [];
+                $('results').hidden = true;
+                $('photoInfo').textContent = `${photos.length} supported photo or video file(s) selected`;
+                $('process').disabled = !photos.length || !logo;
+                $('process').textContent = 'Apply watermark to all photos and videos';
+                update();
+            };
+            ['size', 'opacity', 'margin', 'quality', 'format', 'videoFormat'].forEach(id => $(id).addEventListener('input', update));
             document.querySelectorAll('.pos').forEach(b => b.onclick = () => { position = b.dataset.pos; document.querySelectorAll('.pos').forEach(x => x.classList.toggle('active', x === b)); update() });
             $('prev').onclick = () => { index--; preview() }; $('next').onclick = () => { index++; preview() };
             const toBlob = (c, m, q) => new Promise((resolve, reject) => c.toBlob(b => b ? resolve(b) : reject(Error('Image export failed')), m, q));
             function outName(f, m) { const ext = m === 'image/png' ? 'png' : m === 'image/webp' ? 'webp' : 'jpg'; return f.name.replace(/\.[^.]+$/, '') + '_watermarked.' + ext }
+            function videoMimeType() {
+                if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) throw Error('Video export is not supported by this browser.');
+                const preference = $('videoFormat').value;
+                const mp4 = ['video/mp4;codecs="avc1.42E01E,mp4a.40.2"', 'video/mp4;codecs=avc1.42E01E', 'video/mp4'];
+                const webm = ['video/webm;codecs="vp9,opus"', 'video/webm;codecs="vp8,opus"', 'video/webm'];
+                const candidates = preference === 'webm' ? webm : preference === 'mp4' ? mp4 : [...mp4, ...webm];
+                const mime = candidates.find(type => MediaRecorder.isTypeSupported(type));
+                if (!mime) throw Error(preference === 'mp4' ? 'MP4 export is not supported by this browser.' : preference === 'webm' ? 'WebM export is not supported by this browser.' : 'This browser does not support MP4 or WebM video export.');
+                return mime;
+            }
+            function outVideoName(file, mime) {
+                const extension = mime.includes('mp4') ? 'mp4' : 'webm';
+                return file.name.replace(/\.[^.]+$/, '') + `_watermarked.${extension}`;
+            }
+            async function recordVideo(video, mime, s, audioContext, onProgress) {
+                if (!video.duration || !Number.isFinite(video.duration)) throw Error('This video has no supported duration.');
+                const { width, height } = dimensions(video), videoCanvas = document.createElement('canvas');
+                videoCanvas.width = width; videoCanvas.height = height;
+                const videoStream = videoCanvas.captureStream(30);
+                if (!videoStream) throw Error('Canvas video recording is not supported by this browser.');
+                let source, audioDestination, frameId, recorder, recording, playbackError;
+                try {
+                    if (audioContext) {
+                        await audioContext.resume();
+                        source = audioContext.createMediaElementSource(video);
+                        audioDestination = audioContext.createMediaStreamDestination();
+                        source.connect(audioDestination);
+                        audioDestination.stream.getAudioTracks().forEach(track => videoStream.addTrack(track));
+                    } else {
+                        video.muted = true;
+                    }
+                    const chunks = [];
+                    recorder = new MediaRecorder(videoStream, { mimeType: mime });
+                    recording = new Promise((resolve, reject) => {
+                        recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data) };
+                        recorder.onerror = event => reject(event.error || Error('Video recording failed.'));
+                        recorder.onstop = () => playbackError ? reject(playbackError) : chunks.length ? resolve(new Blob(chunks, { type: recorder.mimeType || mime })) : reject(Error('Video export produced no data.'));
+                        video.onended = () => { if (recorder.state !== 'inactive') recorder.stop() };
+                        video.onerror = () => { playbackError = Error('Video playback failed during encoding.'); if (recorder.state !== 'inactive') recorder.stop() };
+                    });
+                    const renderFrame = () => {
+                        draw(videoCanvas, video, logo, s);
+                        onProgress(video.currentTime / video.duration);
+                        if (!video.paused && !video.ended) frameId = requestAnimationFrame(renderFrame);
+                    };
+                    draw(videoCanvas, video, logo, s);
+                    recorder.start(1000);
+                    await video.play();
+                    renderFrame();
+                    return await recording;
+                } catch (error) {
+                    if (recorder && recorder.state !== 'inactive') recorder.stop();
+                    if (recording) await recording.catch(() => {});
+                    throw error;
+                } finally {
+                    cancelAnimationFrame(frameId);
+                    video.pause();
+                    if (source) source.disconnect();
+                    if (audioDestination) audioDestination.stream.getTracks().forEach(track => track.stop());
+                    videoStream.getTracks().forEach(track => track.stop());
+                }
+            }
             const crcTable = (() => { const table = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; table[n] = c >>> 0 } return table })();
             function crc32(bytes) { let crc = 0xffffffff; for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8); return (crc ^ 0xffffffff) >>> 0 }
             function zipHeader(size, nameBytes, crc, offset, central, time, date) {
@@ -649,7 +752,7 @@
                 return header;
             }
             async function createZip(files) {
-                if (!files.length) throw Error('There are no successfully processed photos to download.');
+                if (!files.length) throw Error('There are no successfully processed files to download.');
                 if (files.length > 65535) throw Error('ZIP format supports up to 65,535 files per archive.');
                 const encoder = new TextEncoder(), parts = [], directory = [], usedNames = new Set();
                 let offset = 0, directorySize = 0;
@@ -683,31 +786,62 @@
                 results.forEach(r => r.url && URL.revokeObjectURL(r.url));
                 results = [];
                 const s = settings(), choice = $('format').value, q = +$('quality').value / 100, tmp = document.createElement('canvas');
-                for (let i = 0; i < photos.length; i++) {
-                    const f = photos[i];
-                    try {
-                        const { img, url } = await readImage(f);
-                        showProcessingPreview(img, i, s);
-                        draw(tmp, img, logo, s);
-                        URL.revokeObjectURL(url);
-                        let mime = choice === 'original' ? (f.type === 'image/png' ? 'image/png' : f.type === 'image/webp' ? 'image/webp' : 'image/jpeg') : choice;
-                        const blob = await toBlob(tmp, mime, mime === 'image/png' ? undefined : q);
-                        mime = blob.type || mime;
-                        results.push({ blob, url: URL.createObjectURL(blob), name: outName(f, mime) });
-                    } catch (err) {
-                        results.push({ error: true, name: f.name });
+                let audioContext;
+                if (photos.some(file => file.type.startsWith('video/'))) {
+                    const AudioContextType = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextType) {
+                        try { audioContext = new AudioContextType(); audioContext.resume().catch(() => {}) } catch (error) { audioContext = null }
                     }
-                    const pct = Math.round((i + 1) / photos.length * 100);
+                }
+                for (let i = 0; i < photos.length; i++) {
+                    const f = photos[i], videoFile = f.type.startsWith('video/');
+                    try {
+                        if (videoFile) {
+                            const { video, url } = await openVideo(f);
+                            try {
+                                showProcessingPreview(video, i, s);
+                                const mime = videoMimeType();
+                                const blob = await recordVideo(video, mime, s, audioContext, fraction => {
+                                    const pct = Math.floor(((i + fraction) / photos.length) * 100);
+                                    $('bar').style.width = pct + '%';
+                                    $('progressPct').textContent = pct + '%';
+                                    $('progressText').textContent = `Encoding video ${i + 1} of ${photos.length} · ${Math.floor(fraction * 100)}%`;
+                                });
+                                results.push({ blob, url: URL.createObjectURL(blob), name: outVideoName(f, blob.type || mime) });
+                            } finally {
+                                video.pause();
+                                video.removeAttribute('src');
+                                video.load();
+                                URL.revokeObjectURL(url);
+                            }
+                        } else {
+                            const { img, url } = await readImage(f);
+                            try {
+                                showProcessingPreview(img, i, s);
+                                draw(tmp, img, logo, s);
+                                let mime = choice === 'original' ? (f.type === 'image/png' ? 'image/png' : f.type === 'image/webp' ? 'image/webp' : 'image/jpeg') : choice;
+                                const blob = await toBlob(tmp, mime, mime === 'image/png' ? undefined : q);
+                                mime = blob.type || mime;
+                                results.push({ blob, url: URL.createObjectURL(blob), name: outName(f, mime) });
+                            } finally {
+                                URL.revokeObjectURL(url);
+                            }
+                        }
+                    } catch (error) {
+                        results.push({ error: true, name: f.name, message: error.message });
+                    }
+                    const pct = Math.round(((i + 1) / photos.length) * 100);
                     $('bar').style.width = pct + '%';
                     $('progressPct').textContent = pct + '%';
                     $('progressText').textContent = `Processed ${i + 1} of ${photos.length}`;
                 }
+                if (audioContext) await audioContext.close();
                 $('fileList').replaceChildren();
                 results.forEach(r => {
                     const row = document.createElement('div');
                     row.className = 'file';
                     const name = document.createElement('span');
-                    name.textContent = r.name + (r.error ? ' — Failed' : '');
+                    name.textContent = r.name + (r.error ? ` — Failed${r.message ? `: ${r.message}` : ''}` : '');
                     row.append(name);
                     if (!r.error) {
                         const a = document.createElement('a');
@@ -725,7 +859,7 @@
                 index = Math.min(selectedIndex, photos.length - 1);
                 preview();
                 $('process').disabled = false;
-                $('process').textContent = 'Process again';
+                $('process').textContent = 'Process photos and videos again';
                 busy = false;
             }
             $('process').onclick = processPhotos;
@@ -734,9 +868,9 @@
                 button.disabled = true; button.textContent = 'Preparing ZIP...';
                 try {
                     const zip = await createZip(successful), url = URL.createObjectURL(zip), link = document.createElement('a');
-                    link.href = url; link.download = 'mcgi-watermarked-photos.zip'; document.body.append(link); link.click(); link.remove();
+                    link.href = url; link.download = 'mcgi-watermarked-files.zip'; document.body.append(link); link.click(); link.remove();
                     setTimeout(() => URL.revokeObjectURL(url), 1000);
-                    $('status').textContent = `ZIP download started: ${successful.length} photo(s).`;
+                    $('status').textContent = `ZIP download started: ${successful.length} file(s).`;
                 } catch (error) {
                     $('status').textContent = `Could not create ZIP: ${error.message}`;
                 } finally {
