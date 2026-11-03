@@ -1,4 +1,4 @@
-# MCGI NE WaterMark Studio
+# MCGI Nueva Ecija WaterMark Studio
 
 Welcome, brethren! This project is proudly owned and maintained by MCGI Productions Nueva Ecija. It is a dedicated local tool designed to help us add watermarks to photos in a clean, efficient, and professional way while keeping the process simple and secure.
 
