@@ -374,6 +374,28 @@
             object-fit: contain
         }
 
+        .preview canvas.is-sliding {
+            animation: preview-slide-in .4s ease both
+        }
+
+        @keyframes preview-slide-in {
+            from {
+                opacity: .35;
+                transform: translateX(24px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0)
+            }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            .preview canvas.is-sliding {
+                animation: none
+            }
+        }
+
         .preview + .studio-row {
             margin-top: 14px
         }
@@ -587,6 +609,19 @@
             const settings = () => ({ size: +$('size').value / 100, opacity: +$('opacity').value / 100, margin: +$('margin').value / 100, pos: position });
             function draw(target, img, mark, s) { const w = img.naturalWidth, h = img.naturalHeight; target.width = w; target.height = h; const c = target.getContext('2d'); c.clearRect(0, 0, w, h); c.drawImage(img, 0, 0, w, h); if (!mark) return; const lw = w * s.size, lh = lw * mark.naturalHeight / mark.naturalWidth, m = Math.min(w, h) * s.margin; let x = m, y = m; if (s.pos.endsWith('r')) x = w - m - lw; if (s.pos.endsWith('c')) x = (w - lw) / 2; if (s.pos.startsWith('b')) y = h - m - lh; if (s.pos.startsWith('m')) y = (h - lh) / 2; c.save(); c.globalAlpha = s.opacity; c.drawImage(mark, x, y, lw, lh); c.restore() }
             function preview() { const f = photos[index]; $('counter').textContent = photos.length ? `${index + 1} / ${photos.length}` : '0 / 0'; $('prev').disabled = !f || index === 0; $('next').disabled = !f || index === photos.length - 1; $('empty').hidden = !!f; canvas.hidden = !f; if (!f) { $('orientation').textContent = 'No image'; return } $('orientation').textContent = f.width >= f.height ? 'Landscape' : 'Portrait'; readImage(f).then(({ img, url }) => { if (photos[index] === f) draw(canvas, img, logo, settings()); URL.revokeObjectURL(url) }).catch(() => { $('empty').hidden = false; $('empty').textContent = 'Unable to preview this image'; canvas.hidden = true }) }
+            function showProcessingPreview(img, photoIndex, s) {
+                index = photoIndex;
+                $('counter').textContent = `${index + 1} / ${photos.length}`;
+                $('prev').disabled = index === 0;
+                $('next').disabled = index === photos.length - 1;
+                $('orientation').textContent = img.naturalWidth >= img.naturalHeight ? 'Landscape' : 'Portrait';
+                $('empty').hidden = true;
+                canvas.hidden = false;
+                canvas.classList.remove('is-sliding');
+                draw(canvas, img, logo, s);
+                void canvas.offsetWidth;
+                canvas.classList.add('is-sliding');
+            }
             function update() { [['size', 'sizeVal'], ['opacity', 'opacityVal'], ['margin', 'marginVal'], ['quality', 'qualityVal']].forEach(([a, b]) => $(b).textContent = $(a).value + '%'); $('qualityWrap').hidden = $('format').value === 'image/png'; preview() }
             $('logoFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const o = await readImage(f); if (logoURL) URL.revokeObjectURL(logoURL); logo = o.img; logoURL = o.url; $('logoThumb').src = logoURL; $('logoThumb').hidden = false; $('logoInfo').textContent = `${f.name} · ${logo.naturalWidth} × ${logo.naturalHeight}`; $('process').disabled = !photos.length; update() } catch { $('logoInfo').textContent = 'Could not load logo' } };
             $('photoFiles').onchange = e => { photos = Array.from(e.target.files).filter(f => f.type.startsWith('image/')); photos.sort((a, b) => (a.webkitRelativePath || a.name).localeCompare(b.webkitRelativePath || b.name, undefined, { numeric: true })); index = 0; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = []; $('results').hidden = true; $('photoInfo').textContent = `${photos.length} supported image(s) selected`; $('process').disabled = !photos.length || !logo; update() };
@@ -638,9 +673,60 @@
                 return new Blob([...parts, ...directory, end], { type: 'application/zip' });
             }
             async function processPhotos() {
-                if (busy || !logo || !photos.length) return; busy = true; $('process').disabled = true; $('process').textContent = 'Processing...'; $('results').hidden = true; $('progressWrap').hidden = false; results.forEach(r => r.url && URL.revokeObjectURL(r.url)); results = []; const s = settings(), choice = $('format').value, q = +$('quality').value / 100, tmp = document.createElement('canvas');
-                for (let i = 0; i < photos.length; i++) { const f = photos[i]; try { const { img, url } = await readImage(f); draw(tmp, img, logo, s); URL.revokeObjectURL(url); let mime = choice === 'original' ? (f.type === 'image/png' ? 'image/png' : f.type === 'image/webp' ? 'image/webp' : 'image/jpeg') : choice; const blob = await toBlob(tmp, mime, mime === 'image/png' ? undefined : q); mime = blob.type || mime; results.push({ blob, url: URL.createObjectURL(blob), name: outName(f, mime) }) } catch (err) { results.push({ error: true, name: f.name }) } const pct = Math.round((i + 1) / photos.length * 100); $('bar').style.width = pct + '%'; $('progressPct').textContent = pct + '%'; $('progressText').textContent = `Processed ${i + 1} of ${photos.length}` }
-                $('fileList').replaceChildren(); results.forEach(r => { const row = document.createElement('div'); row.className = 'file'; const name = document.createElement('span'); name.textContent = r.name + (r.error ? ' — Failed' : ''); row.append(name); if (!r.error) { const a = document.createElement('a'); a.className = 'download'; a.textContent = 'Download'; a.href = r.url; a.download = r.name; row.append(a) } $('fileList').append(row) }); const good = results.filter(r => !r.error).length; $('status').textContent = `Completed: ${good} successful, ${results.length - good} failed.`; $('results').hidden = false; $('process').disabled = false; $('process').textContent = 'Process again'; busy = false
+                if (busy || !logo || !photos.length) return;
+                busy = true;
+                const selectedIndex = index;
+                $('process').disabled = true;
+                $('process').textContent = 'Processing...';
+                $('results').hidden = true;
+                $('progressWrap').hidden = false;
+                results.forEach(r => r.url && URL.revokeObjectURL(r.url));
+                results = [];
+                const s = settings(), choice = $('format').value, q = +$('quality').value / 100, tmp = document.createElement('canvas');
+                for (let i = 0; i < photos.length; i++) {
+                    const f = photos[i];
+                    try {
+                        const { img, url } = await readImage(f);
+                        showProcessingPreview(img, i, s);
+                        draw(tmp, img, logo, s);
+                        URL.revokeObjectURL(url);
+                        let mime = choice === 'original' ? (f.type === 'image/png' ? 'image/png' : f.type === 'image/webp' ? 'image/webp' : 'image/jpeg') : choice;
+                        const blob = await toBlob(tmp, mime, mime === 'image/png' ? undefined : q);
+                        mime = blob.type || mime;
+                        results.push({ blob, url: URL.createObjectURL(blob), name: outName(f, mime) });
+                    } catch (err) {
+                        results.push({ error: true, name: f.name });
+                    }
+                    const pct = Math.round((i + 1) / photos.length * 100);
+                    $('bar').style.width = pct + '%';
+                    $('progressPct').textContent = pct + '%';
+                    $('progressText').textContent = `Processed ${i + 1} of ${photos.length}`;
+                }
+                $('fileList').replaceChildren();
+                results.forEach(r => {
+                    const row = document.createElement('div');
+                    row.className = 'file';
+                    const name = document.createElement('span');
+                    name.textContent = r.name + (r.error ? ' — Failed' : '');
+                    row.append(name);
+                    if (!r.error) {
+                        const a = document.createElement('a');
+                        a.className = 'download';
+                        a.textContent = 'Download';
+                        a.href = r.url;
+                        a.download = r.name;
+                        row.append(a);
+                    }
+                    $('fileList').append(row);
+                });
+                const good = results.filter(r => !r.error).length;
+                $('status').textContent = `Completed: ${good} successful, ${results.length - good} failed.`;
+                $('results').hidden = false;
+                index = Math.min(selectedIndex, photos.length - 1);
+                preview();
+                $('process').disabled = false;
+                $('process').textContent = 'Process again';
+                busy = false;
             }
             $('process').onclick = processPhotos;
             $('downloadAll').onclick = async () => {

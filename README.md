@@ -12,6 +12,7 @@ MCGI NE WaterMark Studio is a browser-based application for adding a logo waterm
 - Upload a watermark logo in PNG, JPEG, WebP, or SVG format.
 - Adjust watermark size, opacity, and distance from the image edge.
 - Preview watermark placement before processing.
+- Automatically slide through photos in the preview panel while batch processing.
 - Export as JPEG, PNG, or WebP, or retain the source image format where supported.
 - Download processed images individually or as a single ZIP archive.
 
