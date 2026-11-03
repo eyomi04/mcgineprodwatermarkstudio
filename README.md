@@ -1,69 +1,36 @@
 # <span style="font-family: 'Times New Roman', Times, serif;">MCGI</span> Nueva Ecija WaterMark Studio
 
-Welcome, brethren! This project is proudly owned and maintained by MCGI Productions Nueva Ecija. It is a dedicated local tool designed to help us add watermarks to photos in a clean, efficient, and professional way while keeping the process simple and secure.
+This project is the property of MCGI Productions Nueva Ecija.
 
-This project is a product of the MCGI Production team in Nueva Ecija, created to support our church and media needs with excellence, integrity, and a spirit of service.
+## Overview
 
-## Ownership Notice
-
-This software and all related materials in this project are the property of MCGI Productions Nueva Ecija.
-
-All content, design, code, and assets within this project are intended for official and authorized use within the scope of MCGI work and church operations.
-
-## Project Overview
-
-MCGI NE WaterMark Studio is a browser-based photo watermarking tool that allows users to:
-
-- Upload one or more photos
-- Add a watermark logo or brand mark
-- Adjust size, opacity, and margin
-- Preview image placement before final output
-- Process images locally in the browser
-- Download the watermarked copies without modifying the original files
-
-This is designed for quick, private, and reliable processing while keeping work protected and respectful of the original source files.
-
-## Why This Project Exists
-
-In every church effort, good presentation matters. This tool helps us prepare images with a professional and consistent look while honoring the identity and branding of MCGI Productions Nueva Ecija.
-
-Our aim is simple: to serve with excellence, provide quality output, and support the mission of spreading the good news with dignity and care.
-
-## How It Works
-
-1. Open the application in your browser.
-2. Upload the photo files you want to process.
-3. Add and configure your watermark logo.
-4. Adjust the watermark settings such as size, opacity, and position.
-5. Preview the result.
-6. Apply the watermark to create new output files.
-7. Download the finished images.
-
-The application processes the images locally in your browser, which helps protect privacy and keeps the process efficient.
+MCGI NE WaterMark Studio is a browser-based application for adding a logo watermark to one or more images. Image processing runs in the browser. The application does not modify the original files or require an account or internet connection after the project files have been downloaded.
 
 ## Features
 
-- Local photo watermarking
-- Batch image processing
-- Adjustable watermark placement
-- Flexible opacity, margin, and size controls
-- Export in common image formats
-- Simple and user-friendly interface
+- Select multiple images or an image directory.
+- Upload a watermark logo in PNG, JPEG, WebP, or SVG format.
+- Adjust watermark size, opacity, and distance from the image edge.
+- Preview watermark placement before processing.
+- Export as JPEG, PNG, or WebP, or retain the source image format where supported.
+- Download processed images individually or together.
 
-## Notes
+## Use
 
-- Original files remain untouched.
-- New watermarked versions are generated as separate files.
-- This tool is intended for authorized and proper use aligned with MCGI church and production work.
+1. Open `photo-watermark-studio.html` in a supported browser.
+2. Select a watermark logo and the photos to process.
+3. Configure the watermark and output settings.
+4. Preview the result and select **Apply watermark to all photos**.
+5. Download the processed images.
 
-## MCGI Brethren Reminder
+Output files are named with the `_watermarked` suffix. The original image files are not changed.
 
-Let us continue to work with unity, professionalism, and a heart for service. May every project we do reflect the excellence and spirit of our brethren in MCGI Productions Nueva Ecija.
+## Project Files
 
-May this tool be used with care, responsibility, and purpose for the glory of God and the mission of MCGI.
+- `photo-watermark-studio.html` — application interface and image-processing code.
+- `assets/` — stylesheets and fonts used by the interface.
+- `.gitignore` — excludes image files from Git tracking.
 
-## Final Statement
+## Ownership
 
-This project is a property of MCGI Productions Nueva Ecija and is dedicated to supporting the work of the church with excellence, sincerity, and faithfulness.
-
-Blessed and guided by the spirit of service, we move forward with purpose.
+The application, source code, and project assets are maintained by MCGI Productions Nueva Ecija and are intended for its authorized production use.
